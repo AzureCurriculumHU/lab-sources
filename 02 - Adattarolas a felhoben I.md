@@ -1,5 +1,5 @@
 # Adattárolás a felhőben I. #
-## Snipet #1 ##
+## #1 ##
 ```cs
 public static class CloudManager
 {
@@ -8,7 +8,7 @@ public static class CloudManager
 }
 ```
 ------------------------------------------------------
-## Snipet #2 ##
+## #2 ##
 ```cs
 public static List<CloudBlobContainer> GetContainers()
 {
