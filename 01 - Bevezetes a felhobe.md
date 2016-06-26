@@ -1,15 +1,22 @@
 # Bevezetés a felőbe. #
 ## #1 ##
-<code></code><code>PowerShell
+```cs
+Add-AzureAccount
+Get-AzureSubscription
 Select-AzureSubscription "Azure Pass"
-</code><code></code>
-
+Get-AzureService
+Get-AzureDeployment -Slot Staging -ServiceName lab04cloudservice
+Move-AzureDeployment -ServiceName lab04cloudservice
+Get-AzureDeployment -ServiceName lab04cloudservice
+```
 ------------------------------------------------------
 ## #2 ##
 ```cs
-public static List<CloudBlobContainer> GetContainers()
-{
-  var client = account.CreateCloudBlobClient();
-  return client.ListContainers().ToList();
-}
+azure
+azure login
+azure login -u microsoft@account.com
+azure account set "Azure Pass"
+azure storage account list
+azure storage account delete lab04cloudservice
+azure storage account delete mysttorageaccountkb
 ```
