@@ -67,7 +67,6 @@ public static void UploadBlob( string file, CloudBlobContainer container )
 }
 ```
 -------------------------------------------------------
--------------------------------------------------------
 ## #8 ##
 ```cs
 private void uploadBlobToolStripMenuItem_Click( object sender, EventArgs e )
