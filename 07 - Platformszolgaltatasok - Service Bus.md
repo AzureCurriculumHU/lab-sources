@@ -1,4 +1,4 @@
-# Platformszolgáltatások - Cloud Services #
+# Platformszolgáltatások - Service Bus #
 ## #1 ##
 ```cs
 [Serializable]
