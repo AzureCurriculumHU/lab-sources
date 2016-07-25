@@ -32,7 +32,7 @@ Microsoft Azure PowerShell 1.6.0
 
 Visual Studio Code v1.3
 
-[letöltés (Windows, Linux, OS X)] https://code.visualstudio.com/Download
+[letöltés (Windows, Linux, OS X)] https://code.visualstudio.com/Download)
 
 
 
