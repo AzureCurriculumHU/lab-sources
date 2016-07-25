@@ -34,5 +34,19 @@ Visual Studio Code v1.3
 
 [letöltés (Windows, Linux, OS X)](https://code.visualstudio.com/Download)
 
+## Azure előfizetés ##
+
+Élő Azure előfizetés. 
+
+[30 napos ingyenes próbaverzió (bankkártya szükséges)](https://azure.microsoft.com/hu-hu/free/)
+
+[Egyetemi kurzusokhoz](https://www.microsoftazurepass.com/azureu)
+
+[Hallgatóknak, DreamSpark program keretévben](https://www.dreamspark.com/Product/Product.aspx?productid=99)
+
+## Visual Studio Team Services ##
+
+[ingyenes előfizetés](https://www.visualstudio.com/en-us/products/visual-studio-team-services-vs.aspx)
+
 
 
