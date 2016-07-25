@@ -18,7 +18,21 @@ Microsoft Azure SDK for .NET (VS2015) v2.9.1.
 Microsoft Azure Cross-platform Command Line Tools v0.10.2
 
 [letöltés](https://www.microsoft.com/web/handlers/webpi.ashx?command=getinstallerredirect&appid=windowsazurexplatcli&mode=new)
+
 [OS X és Linux telepítés](https://azure.microsoft.com/hu-hu/documentation/articles/xplat-cli-install/)
+
+## Azure PowerShell ##
+Microsoft Azure PowerShell 1.6.0
+
+[GitHub oldal](https://github.com/Azure/azure-powershell)
+
+[telepítési útmutató](https://azure.microsoft.com/en-us/documentation/articles/powershell-install-configure/)
+
+## Visual Studio Code ##
+
+Visual Studio Code v1.3
+
+[letöltés (Windows, Linux, OS X)] https://code.visualstudio.com/Download
 
 
 
