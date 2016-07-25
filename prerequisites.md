@@ -1,6 +1,6 @@
 # Laborok szoftver-követelményei #
 ## Összefoglaló ##
-E leírás a laborútmutatók elején megjelölt szoftver-előkövetelményeket rendszerezit.
+E leírás a laborútmutatók elején megjelölt szoftver-előkövetelményeket rendszerezi. A szoftvereknél általában megjelöljük azt a verziót, amellyel az útmutató készült. A szoftverek újabb verzióival általában szintén végigvihetőek a laborok, de kisebb eltérések előfordulhatnak az útmutatókhoz képest.
 
 ## Visual Studio 2015 ##
 A Visual Studio 2015 Community és Professional és Enterprise változatai is megfelelnek a laborok végrehajtásához. 
