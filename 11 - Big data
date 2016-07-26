@@ -1,0 +1,27 @@
+# Big data #
+## #1 ##
+```cs
+static async Task MakeRequest(string imageUrl)
+{
+    var client = new FaceServiceClient("{api kulcs ide}");
+    var attributes = new List<FaceAttributeType> {FaceAttributeType.Age, FaceAttribute
+                     Type.Gender};
+    var res = await client.DetectAsync(imageUrl, false, true, attributes);
+    foreach (var face in res)
+    {
+        Console.WriteLine($"Kor: {face.FaceAttributes.Age} Nem: {face.FaceAttributes.Gender}");
+    }
+}
+```
+------------------------------------------------------
+## #2 ##
+```cs
+static void Main(string[] args)
+{
+    Console.WriteLine("Kérem adja meg a kép URL-jét:");
+    MakeRequest(Console.ReadLine()).Wait();
+    Console.WriteLine("A kilépéshez nyomjon meg egy gombot.");
+    Console.ReadKey();
+}
+```
+------------------------------------------------------
