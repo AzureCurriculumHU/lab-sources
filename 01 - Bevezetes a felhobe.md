@@ -19,4 +19,4 @@ azure account set "Azure Pass"
 azure storage account list
 azure storage account delete lab04cloudservice
 azure storage account delete mysttorageaccountkb
-```
+``` 
