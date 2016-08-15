@@ -22,7 +22,7 @@ Microsoft Azure Cross-platform Command Line Tools v0.10.2
 [OS X és Linux telepítés](https://azure.microsoft.com/hu-hu/documentation/articles/xplat-cli-install/)
 
 ## Azure PowerShell ##
-Microsoft Azure PowerShell v1.6.0
+Microsoft Azure PowerShell v2.0.1
 
 [GitHub oldal](https://github.com/Azure/azure-powershell)
 
