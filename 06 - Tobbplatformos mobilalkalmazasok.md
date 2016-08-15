@@ -1,8 +1,31 @@
 # Többplatformos mobilalkalmazások
 ## #1 ##
 ```cs
+private MessageDialog dialog = new MessageDialog("");
+private bool isOpen = false;
+```
+
+## #2 ##
+```cs
+private async Task ShowDialogAsync(string content, string title = "Hiba")
+{
+    if (isOpen)
+    {
+        return;
+    }
+    dialog.Title = title;
+    dialog.Content = content;
+    isOpen = true;
+    await dialog.ShowAsync();
+    isOpen = false;
+}
+```
+
+## #3 ##
+```cs
 private async Task SyncAsync()
 {
+    string content;
     try
     {
         await App.MobileService.SyncContext.PushAsync();
@@ -10,23 +33,22 @@ private async Task SyncAsync()
     }
     catch (MobileServicePushFailedException ex)
     {
-        await new MessageDialog(
-            "Szinkronizáció nem sikerült, lehet kapcsolat nélküli állapotban vagy.\nÜzenet: " +
-            ex.Message + "\nÁllapot: " + ex.PushResult.Status.ToString())
-            .ShowAsync();
-    }
+        content = "Szinkronizáció nem sikerült, lehet, hogy kapcsolat nélküli állapotban vagy.\n" + 
+           "Üzenet: " + ex.Message + "\nÁllapot: " + ex.PushResult.Status.ToString();
+        await ShowDialogAsync(content);
+    } 
     catch (Exception ex)
     {
-        await new MessageDialog(
-            "Szinkronizáció sikertelen " + ex.Message +
-            "\n\nHa még mindig kapcsolat nélküli állapotban vagy, " +
-            "próbálj frissíteni, akkor ha él a kapcsolat.")
-            .ShowAsync();
+        content = "Szinkronizáció sikertelen " + ex.Message +
+                  "\n\nHa még mindig kapcsolat nélküli állapotban vagy, " +
+                  "próbálj frissíteni a kapcsolat felépítését követően.";
+
+        await ShowDialogAsync(content);
     }
 }
 ```
 ------------------------------------------------------
-## #2 ##
+## #4 ##
 ```cs
 private async Task SendNotification(TodoItem item)
 {
@@ -55,7 +77,7 @@ private async Task SendNotification(TodoItem item)
 }
 ```
 ------------------------------------------------------
-## #3 ##
+## #5 ##
 ```cs
 private async Task InitNotificationsAsync()
 {
