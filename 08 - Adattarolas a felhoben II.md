@@ -21,15 +21,12 @@ public class Item
 ```cs
 using Microsoft.Azure.Documents; 
 using Microsoft.Azure.Documents.Client; 
-using Microsoft.Azure.Documents.Linq; 
-using System.Configuration;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 ```
 ------------------------------------------------------
 ## #3 ##
 ```cs
-public static class DocumentDBRepository<T>
+public static class DocumentDBRepository
 {
   private static string databaseId = "ToDoDatabase";
   private static string collectionId = "Items";
@@ -165,69 +162,54 @@ public async Task<ActionResult> Edit(  Item item )
 -------------------------------------------------------
 ## #10 ##
 ```cs
-public class CacheEnabledRepository
+public static class CacheManager
 {
-  private DbFakeSource dataSource;
-  private ConnectionMultiplexer connection;		
+    private const string connectionString = "(A portálról letöltött connection string.)";
+    private static readonly ConnectionMultiplexer connection = ConnectionMultiplexer.Connect(connectionString);
+
+    public static string GetValue(int key)
+    {
+        IDatabase cache = connection.GetDatabase();
+        var value = cache.StringGet(key.ToString());
+        if (value.IsNull)
+        {
+            return null;
+        }
+        else
+        {
+            return value.ToString();
+        }
+    }
+
+    public static void SetValue(int key, string newValue)
+    {
+        IDatabase cache = connection.GetDatabase();
+        cache.StringSet(key.ToString(), newValue);
+    }
 }
 ```
 -------------------------------------------------------
 ## #11 ##
 ```cs
-public CacheEnabledRepository()
+static void Main(string[] args)
 {
-  dataSource = new DbFakeSource();
-  var connectionString = "azlabcache.redis.cache.windows.net,ssl=true,password=[password]";
-  connection = ConnectionMultiplexer.Connect( connectionString );
-}
-```
--------------------------------------------------------
-## #12 ##
-```cs
-public Product GetProduct( int productId )
-{
-  
-  IDatabase cache = connection.GetDatabase();			  
-  var serializedProduct = cache.StringGet( productId.ToString() );
-			  
-  if( serializedProduct.IsNull )
-  {    
-    cache.StringSet( productId.ToString(), RedisHelper.GetStringFromProduct( product ) );
-    return product;
-  }      
-  return RedisHelper.GetProductFromString( serializedProduct );  
-}
-```
--------------------------------------------------------
-## #13 ##
-```cs
-public void InsertProduct( Product p )
-{  
-  p.ProductId = dataSource.Products.Select( prod => prod.ProductId ).Max() + 1;
-			  
-  dataSource.Products.Add( p );
-			   
-  IDatabase cache = connection.GetDatabase();
-	cache.StringSet( p.ProductId.ToString(), RedisHelper.GetStringFromProduct( p ) );
-}
- 
-public void UpdateProduc( Product p )
-{  
-  var productToRemove = dataSource.Products.Single( prod => prod.ProductId == p.ProductId );
-  dataSource.Products.Remove( productToRemove );
-  dataSource.Products.Add( p );
+    Console.WriteLine("Add meg a kulcsot! (1-10)");
+    int key = int.Parse(Console.ReadLine());
+    string val = CacheManager.GetValue(key);
+    if (val == null)
+    {
+        Console.WriteLine("Nincs tárolt elem!");
+    }
+    else
+    {
+        Console.WriteLine($"Tárolt érték: {val}");
+    }
 
-  IDatabase cache = connection.GetDatabase();
-  cache.StringSet( p.ProductId.ToString(), RedisHelper.GetStringFromProduct( p ) );
-}
- 
-public void DeleteProduct( int productId )
-{  
-  var productToRemove = dataSource.Products.Single( prod => prod.ProductId == productId );
-  dataSource.Products.Remove( productToRemove );			
-   
-  IDatabase cache = connection.GetDatabase();
-  cache.StringSet( productId.ToString(), (string)null );
+    Console.WriteLine("Add meg az új értéket!");
+    string newValue = Console.ReadLine();
+    CacheManager.SetValue(key, newValue);
+    Console.WriteLine("Nyomj meg egy billentyűt a kilépéshez!");
+    Console.ReadKey();
 }
 ```
 -------------------------------------------------------
