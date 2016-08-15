@@ -94,13 +94,15 @@ public static List<IListBlobItem> GetBlobs( CloudBlobContainer container )
 ```cs
 private void PopulateBlobs()
 {
-  lvBlobs.Items.Clear();
-  if( lvContainers.SelectedItems.Count == 1 )
-  {
-    foreach (var blob in CloudManager.GetBlobs( (CloudBlobContainer)lvContainers.SelectedItems[0].Tag ) )
+    lvBlobs.Items.Clear();
+    if (lvContainers.SelectedItems.Count != 0)
     {
-       lvBlobs.Items.AddRange(new ListViewItem { Text = blob.Uri.ToString(), Tag = blob.Uri } );
-   }
+        var blobs = CloudManager.GetBlobs((CloudBlobContainer) lvContainers.SelectedItems[0].Tag);
+        foreach (var blob in blobs)
+        {
+            lvBlobs.Items.Add(new ListViewItem {Text = blob.Uri.ToString(), Tag = blob.Uri});
+        }
+    }
 }
 ```
 -------------------------------------------------------
@@ -145,34 +147,25 @@ public static byte[] DownloadBlob(Uri uri)
 -------------------------------------------------------
 ## #14 ##
 ```cs
-private void lvBlobs_MouseClick( object sender, MouseEventArgs e )
+private void lvBlobs_DoubleClick(object sender, EventArgs e)
 {
-  if( e.Button == MouseButtons.Right )
-  {
-     if( lvBlobs.FocusedItem.Bounds.Contains( e.Location ) == true )
-     {
-       lvBlobs.ContextMenuStrip = null;
-       downloadBlob.Show( Cursor.Position );
-      }                
-   }            
+    if (lvBlobs.SelectedItems.Count != 1) return;
+
+    var selectedItem = lvBlobs.SelectedItems[0];
+    var uri = (Uri)selectedItem.Tag;
+    SaveFileDialog saveFile = new SaveFileDialog()
+    {
+        FileName = Path.GetFileName(uri.ToString())
+    };
+    if (saveFile.ShowDialog() == DialogResult.OK)
+    {
+        var contents = CloudManager.DownloadBlob(uri);
+        File.WriteAllBytes(saveFile.FileName, contents);
+    }
 }
 ```
 -------------------------------------------------------
 ## #15 ##
-```cs
-private void downloadToolStripMenuItem_Click( object sender, EventArgs e )
-{
-  SaveFileDialog saveFile = new SaveFileDialog();
-  if( saveFile.ShowDialog() == DialogResult.OK )
-  {
-    var contents = CloudManager.DownloadBlob( (Uri)lvBlobs.SelectedItems[0].Tag );
-    File.WriteAllBytes( saveFile.FileName, contents );
-  }
-  lvBlobs.ContextMenuStrip = uploadBlob;
-}
-```
--------------------------------------------------------
-## #16 ##
 ```cs
 public class Item : TableEntity
 {    
@@ -187,7 +180,7 @@ public class Item : TableEntity
 }
 ```
 -------------------------------------------------------
-## #17 ##
+## #16 ##
 ```cs
 @foreach( var item in Model )
 {
@@ -202,13 +195,13 @@ public class Item : TableEntity
       @Html.DisplayFor( modelItem => item.Completed )
     </td>
      <td>
-       @Html.ActionLink( "Edit", "Edit", new { rowKey = item.RowKey } )             
+       @Html.ActionLink( "Edit", "Edit", new { id = item.RowKey } )             
      </td>
   </tr>
 }
 ```
 -------------------------------------------------------
-## #18 ##
+## #17 ##
 ```cs
 <h4>Item</h4>
 <hr />
@@ -217,7 +210,7 @@ public class Item : TableEntity
 @Html.HiddenFor( model => model.RowKey );
 ```
 -------------------------------------------------------
-## #19 ##
+## #18 ##
 ```cs
 public static class TableRepository
 {
@@ -240,7 +233,7 @@ public static class TableRepository
 }
 ```
 -------------------------------------------------------
-## #20 ##
+## #19 ##
 ```cs
 public static IEnumerable<Item> GetIncompleteItems()
 {
@@ -252,7 +245,7 @@ public static IEnumerable<Item> GetIncompleteItems()
 }
 ```
 -------------------------------------------------------
-## #21 ##
+## #20 ##
 ```cs
 public static Item CreateItem( Item item )
 {
@@ -264,7 +257,7 @@ public static Item CreateItem( Item item )
 }
 ```
 -------------------------------------------------------
-## #22 ##
+## #21 ##
 ```cs
 public ActionResult Index()
 {
@@ -273,7 +266,7 @@ public ActionResult Index()
 }
 ```
 -------------------------------------------------------
-## #23 ##
+## #22 ##
 ```cs
 public ActionResult Create()
 {
@@ -292,7 +285,7 @@ public ActionResult Create(Item item )
 }
 ```
 -------------------------------------------------------
-## #24 ##
+## #23 ##
 ```cs
 public static Item GetItem( string rowKey )
 {
@@ -310,7 +303,7 @@ public static Item UpdateItem( Item item )
 } 
 ```
 -------------------------------------------------------
-## #25 ##
+## #24 ##
 ```cs
 public ActionResult Edit( string id )
 {          
@@ -334,7 +327,7 @@ public async Task<ActionResult> Edit(  Item item )
 }
 ```
 -------------------------------------------------------
-## #26 ##
+## #25 ##
 ```cs
 public static class Prompt
 {
