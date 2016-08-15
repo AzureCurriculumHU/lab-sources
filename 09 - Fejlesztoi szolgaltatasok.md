@@ -39,24 +39,3 @@ private void Error_OnClicked(object sender, RoutedEventArgs e)
 }
 ```
 ------------------------------------------------------
-## #5 ##
-```xaml
-<Button Content="Észrevétel küldése" Click="Feedback_OnClick"/>
-```
-------------------------------------------------------
-## #6 ##
-```cs
-private void Feedback_OnClick(object sender, RoutedEventArgs e)
-{
-    HockeyClient.Current.ShowFeedback();
-}
-```
-------------------------------------------------------
-## #7 ##
-```cs
-protected override void OnActivated(IActivatedEventArgs args)
-{
-    HockeyClient.Current.HandleReactivationOfFeedbackFilePicker(args);
-}   
-```
-------------------------------------------------------
