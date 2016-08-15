@@ -18,165 +18,164 @@ public class GuestBookEntry : TableEntity
 ------------------------------------------------------
 ## #2 ##
 ```cs
-public class GuestBookContext : TableServiceContext
+public class GuestBookDataSource
 {
-  public GuestBookContext(CloudTableClient client) : base(client) { }
-  public IQueryable<GuestBookEntry> GuestBookEntry
-  {
-    get
+    private static CloudStorageAccount account;
+
+    static GuestBookDataSource()
     {
-       return this.CreateQuery<GuestBookEntry>( "GuestBookEntry" );
+        account = CloudStorageAccount.Parse(CloudConfigurationManager.GetSetting("DataConnectionString"));
+        account.CreateCloudTableClient().GetTableReference("GuestBookEntry").CreateIfNotExists();
     }
-  }
+
+    private CloudTable guestBookTable;
+
+    private CloudTable GuestBookTable
+    {
+        get
+        {
+            if (guestBookTable == null)
+            {
+                guestBookTable = account.CreateCloudTableClient().GetTableReference("GuestBookEntry");
+            }
+            return guestBookTable;
+        }
+    }
+
+    public IEnumerable<GuestBookEntry> GuestBookEntries()
+    {
+        TableQuery<GuestBookEntry> query = new TableQuery<GuestBookEntry>()
+            .Where(TableQuery.GenerateFilterCondition("PartitionKey", 
+                QueryComparisons.Equal, DateTime.UtcNow.ToString("MMddyyyy")));
+        return GuestBookTable.ExecuteQuery(query);
+    }
+
+    public void AddGuestBookEntry(GuestBookEntry newItem)
+    {
+        TableOperation operation = TableOperation.Insert(newItem);
+        GuestBookTable.Execute(operation);
+    }
+
+    public void UpdateImageThumbnail(string partitionKey, string rowKey, string thumbUrl)
+    {
+        TableOperation retrieveOperation = TableOperation.Retrieve<GuestBookEntry>(partitionKey, rowKey);
+
+        TableResult retrievedResult = GuestBookTable.Execute(retrieveOperation);
+        GuestBookEntry updateEntity = (GuestBookEntry)retrievedResult.Result;
+
+        if (updateEntity != null)
+        {
+            updateEntity.ThumbnailUrl = thumbUrl;
+            TableOperation replaceOperation = TableOperation.Replace(updateEntity);
+            GuestBookTable.Execute(replaceOperation);
+        }
+    }
 }
 ```
 ------------------------------------------------------
 ## #3 ##
 ```cs
-public class GuestBookDataSource
+public static class CloudManager
 {
-  private static CloudStorageAccount account;
-  private GuestBookContext ctx;
-  
-  static GuestBookDataSource()
-  {
-     account = CloudStorageAccount.Parse( "DataConnectionString" );
-     account.CreateCloudTableClient().GetTableReference( "GuestBookEntry" ).CreateIfNotExists();
-  }
+    private static bool storageInitialized = false;
+    private static object gate = new object();
+    private static CloudBlobClient blobStorage;
+    private static CloudQueueClient queueStorage;
 
-  public GuestBookDataSource()
-  {
-    this.ctx = new GuestBookContext( account.CreateCloudTableClient() );
-  }
-
-  public IEnumerable<GuestBookEntry> GuestBookEntries()
-  {
-    var table = account.CreateCloudTableClient().GetTableReference( "GuestBookEntry" );
-    TableQuery<GuestBookEntry> query = new TableQuery<GuestBookEntry>().Where( TableQuery.GenerateFilterCondition( "PartitionKey", QueryComparisons.Equal, DateTime.UtcNow.ToString( "MMddyyyy" ) ) );
-    return table.ExecuteQuery( query );
-  }
-
-   public void AddGuestBookEntry( GuestBookEntry newItem )
-   {
-     TableOperation operation = TableOperation.Insert( newItem );
-     CloudTable table = ctx.ServiceClient.GetTableReference( "GuestBookEntry" );
-     table.Execute( operation );
-   }
-
-  public void UpdateImageThumbnail( string partitionKey, string rowKey, string thumbUrl )
-  {
-    CloudTable table = ctx.ServiceClient.GetTableReference( "GuestBookEntry" );
-    TableOperation retrieveOperation = TableOperation.Retrieve<GuestBookEntry>( partitionKey, rowKey );
-    TableResult retrievedResult = table.Execute( retrieveOperation );
-    GuestBookEntry updateEntity = (GuestBookEntry)retrievedResult.Result;
-
-    if( updateEntity != null )
+    private static void InitializeStorage()
     {
-      updateEntity.ThumbnailUrl = thumbUrl;
-      TableOperation replaceOperation = TableOperation.Replace( updateEntity );
-      table.Execute( replaceOperation );
+        if (!storageInitialized)
+        {
+            lock (gate)
+            {
+                if (!storageInitialized)
+                {
+                    var storageAccount = CloudStorageAccount.Parse(CloudConfigurationManager
+                        .GetSetting("DataConnectionString"));
+                    blobStorage = storageAccount.CreateCloudBlobClient();
+                    CloudBlobContainer container = blobStorage.GetContainerReference("guestbookpics");
+                    container.CreateIfNotExists();
+
+                    var permissions = container.GetPermissions();
+                    permissions.PublicAccess = BlobContainerPublicAccessType.Container;
+                    container.SetPermissions(permissions);
+                    storageInitialized = true;
+                }
+            }
+        }
     }
-  }
+
+    public static UploadBlobResult UploadBlob(HttpPostedFileBase file)
+    {
+        InitializeStorage();
+        string uniqueBlobName = string.Format("guestbookpics/image_{0}{1}",
+            Guid.NewGuid().ToString(), Path.GetExtension(file.FileName));
+        CloudBlockBlob blob = blobStorage.GetContainerReference("guestbookpics")
+            .GetBlockBlobReference(uniqueBlobName);
+        blob.Properties.ContentType = file.ContentType;
+        blob.UploadFromStream(file.InputStream);
+        return new UploadBlobResult
+        {
+            UniqueBlobName = uniqueBlobName,
+            Uri = blob.Uri.ToString()
+        };
+    }
 }
 ```
 ------------------------------------------------------
 ## #4 ##
 ```cs
-private static bool storageInitialized = false;
-private static object gate = new object();
-private static CloudBlobClient blobStorage;
+[HttpPost]
+[ValidateAntiForgeryToken]
+public ActionResult Index([Bind(Include = "File, Name, Message")]NewGuestBookEntryViewModel vm)
+{
+    if (vm.File != null && vm.File.ContentLength != 0 && ModelState.IsValid)
+    {
+        var result = CloudManager.UploadBlob(vm.File);
+        GuestBookEntry entry = new GuestBookEntry()
+        {
+            GuestName = vm.Name,
+            Message = vm.Message,
+            PhotoUrl = result.Uri,
+            ThumbnailUrl = result.Uri
+        };
+        DataSource.AddGuestBookEntry(entry);
+        return RedirectToAction("Index");
+    }
+    else
+    {
+        ModelState.AddModelError("", "Fájl feltöltése kötelező!");
+        return View(CreateViewModel(vm));
+    }
+}
 ```
 ------------------------------------------------------
 ## #5 ##
 ```cs
-private void InitializeStorage()
-{
-  if( !storageInitialized )
-  {
-    lock ( gate )
-    {
-      if( !storageInitialized )
-      {
-        var storageAccount = CloudStorageAccount.Parse( CloudConfigurationManager.GetSetting( "DataConnectionString" ) );
-        blobStorage = storageAccount.CreateCloudBlobClient();
-        CloudBlobContainer container = blobStorage.GetContainerReference( "guestbookpics" );
-        container.CreateIfNotExists();
-
-        var permissions = container.GetPermissions();
-        permissions.PublicAccess = BlobContainerPublicAccessType.Container;
-        container.SetPermissions( permissions );
-
-        storageInitialized = true;
-       }
-     }
-  }
-}
+queueStorage = storageAccount.CreateCloudQueueClient();
+CloudQueue queue = queueStorage.GetQueueReference("guestthumbs");
+queue.CreateIfNotExists();
 ```
 ------------------------------------------------------
 ## #6 ##
 ```cs
-protected void SignButton_Click( object sender, EventArgs e )
+public static void AddImageToQueue(string uniqueBlobName, string partitionKey, string rowKey)
 {
-  if( this.FileUpload1.HasFile )
-  {
-    this.InitializeStorage();
-                
-    string uniqueBlobName = string.Format( "guestbookpics/image_{0}{1}", Guid.NewGuid().ToString(), Path.GetExtension( this.FileUpload1.FileName ) );
-    CloudBlockBlob blob = blobStorage.GetContainerReference( "guestbookpics" ).GetBlockBlobReference( uniqueBlobName );
-    blob.Properties.ContentType = this.FileUpload1.PostedFile.ContentType;
-    blob.UploadFromStream( this.FileUpload1.FileContent );                
-                
-    GuestBookEntry entry = new GuestBookEntry() { GuestName = this.NameTextBox.Text, Message = this.MessageTextBox.Text, PhotoUrl = blob.Uri.ToString(), ThumbnailUrl = blob.Uri.ToString() };
-    GuestBookDataSource ds = new GuestBookDataSource();
-    ds.AddGuestBookEntry( entry );                
-  }
-
-  this.NameTextBox.Text = string.Empty;
-  this.MessageTextBox.Text = string.Empty;
-  this.DataList1.DataBind();
+    InitializeStorage();
+    var queue = queueStorage.GetQueueReference("guestthumbs");
+    var message = new CloudQueueMessage(string.Format("{0},{1},{2}", 
+        uniqueBlobName, partitionKey, rowKey));
+    queue.AddMessage(message);
 }
 ```
-------------------------------------------------------
+-------------------------------------------------------
 ## #7 ##
-```cs
-protected void Timer1_Tick( object sender, EventArgs e )
-{
-  this.DataList1.DataBind();
-}
-```
--------------------------------------------------------
-## #8 ##
-```cs
-protected void Page_Load( object sender, EventArgs e )
-{
-  if( !Page.IsPostBack )
-  {
-    this.Timer1.Enabled = true;
-  }
-} 
-```
--------------------------------------------------------
-## #9 ##
-```cs
-queueStorage = storageAccount.CreateCloudQueueClient();
-CloudQueue queue = queueStorage.GetQueueReference( "guestthumbs" );
-queue.CreateIfNotExists();
-```
--------------------------------------------------------
-## #10 ##
-```cs
-var queue = queueStorage.GetQueueReference( "guestthumbs" );
-var message = new CloudQueueMessage( string.Format( "{0},{1},{2}", uniqueBlobName, entry.PartitionKey, entry.RowKey ) );
-queue.AddMessage( message );
-```
--------------------------------------------------------
-## #11 ##
 ```cs
 private CloudQueue queue;
 private CloudBlobContainer container;
 ```
 -------------------------------------------------------
-## #12 ##
+## #8 ##
 ```cs
 var storageAccount = CloudStorageAccount.Parse( CloudConfigurationManager.GetSetting( "DataConnectionString" ) );                                    
 CloudQueueClient queueStorage = storageAccount.CreateCloudQueueClient();
@@ -191,7 +190,7 @@ permissions.PublicAccess = BlobContainerPublicAccessType.Container;
 this.container.SetPermissions( permissions );
 ```
 -------------------------------------------------------
-## #13 ##
+## #9 ##
 ```cs
 public void ProcessImage( Stream input, Stream output )
 {
@@ -221,7 +220,7 @@ public void ProcessImage( Stream input, Stream output )
 }
 ```
 -------------------------------------------------------
-## #14 ##
+## #10 ##
 ```cs
 private async Task RunAsync( CancellationToken cancellationToken )
 {
