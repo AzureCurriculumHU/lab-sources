@@ -4,57 +4,44 @@
 [Serializable]
 public class CustomMessage
 {
-  private DateTime date;
-  private string body;
-
-  public DateTime Date
-  {
-    get { return this.date; }
-    set { this.date = value; }
-  }
-
-  public string Body
-  {
-    get { return this.body; }
-    set { this.body = value; }
-  }
+    public string Body { get; set; }
+    public DateTime Date { get; set; }
 }
 ```
 ------------------------------------------------------
 ## #2 ##
 ```cs
-private string connectionString= "";
-private NamespaceManager namespaceManager;
-public HomeController()
-{        
-  namespaceManager = NamespaceManager.CreateFromConnectionString( connectionString );
+public ActionResult Index()
+{
+    var queues = namespaceManager.GetQueues();
+    var result = new List<string>();
+    foreach (var item in queues)
+    {
+        result.Add(item.Path);
+    }
+    return View(result);
 }
 ```
 ------------------------------------------------------
 ## #3 ##
 ```cs
-public JsonResult Queues()
+public long MessageCount(string queueName)
 {
-   var queues = this.namespaceManager.GetQueues().Select( c => new { Name = c.Path, Messages = c.MessageCount } ).ToArray();
-   return this.Json( queues, JsonRequestBehavior.AllowGet );
+    var queueDescription = this.namespaceManager.GetQueue(queueName);
+    if (queueDescription == null)
+    {
+        return 0;
+    }
+    return queueDescription.MessageCount;
 }
 ```
 ------------------------------------------------------
 ## #4 ##
 ```cs
-public long GetMessageCount( string queueName )
-{
-   var queueDescription = this.namespaceManager.GetQueue( queueName );
-   return queueDescription.MessageCount;
-}
-```
-------------------------------------------------------
-## #5 ##
-```cs
 [HttpPost]
 public void SendMessage( string queueName, string messageBody )
-{
-  QueueClient queueClient = QueueClient.CreateFromConnectionString( connectionString, "azuretananyag" );
+  {
+  QueueClient queueClient = QueueClient.CreateFromConnectionString( connectionString, queueName);
   var customMessage = new CustomMessage() { Date = DateTime.Now, Body = messageBody };
   using( var bm = new BrokeredMessage( customMessage ) )
   {
@@ -65,12 +52,12 @@ public void SendMessage( string queueName, string messageBody )
 }
 ```
 ------------------------------------------------------
-## #6 ##
+## #5 ##
 ```cs
 [HttpGet]
 public JsonResult RetrieveMessage( string queueName )
 {
-  QueueClient queueClient = QueueClient.CreateFromConnectionString( connectionString, "azuretananyag", ReceiveMode.PeekLock );
+  QueueClient queueClient = QueueClient.CreateFromConnectionString( connectionString, queueName, ReceiveMode.PeekLock );
   BrokeredMessage receivedMessage = queueClient.Receive( new TimeSpan( 0, 0, 30 ) );
 
   if( receivedMessage == null )
@@ -79,6 +66,7 @@ public JsonResult RetrieveMessage( string queueName )
   }
 
   var receivedCustomMessage = receivedMessage.GetBody<CustomMessage>();
+
   var brokeredMsgProperties = new Dictionary<string, object>();
   brokeredMsgProperties.Add( "Size", receivedMessage.Size );
   brokeredMsgProperties.Add( "MessageId", receivedMessage.MessageId.Substring( 0, 15 ) + "..." );
@@ -89,14 +77,14 @@ public JsonResult RetrieveMessage( string queueName )
   var messageInfo = new
   {
     Label = receivedMessage.Label,
-    Date = receivedCustomMessage.Date,
+    Date = receivedCustomMessage.Date.ToString("yyyy-MM-dd HH:mm:ss"),
     Message = receivedCustomMessage.Body,
     Properties = receivedMessage.Properties.ToArray(),
     BrokeredMsgProperties = brokeredMsgProperties.ToArray()
   };
 
   receivedMessage.Complete();
-  return this.Json( new { MessageInfo = messageInfo }, JsonRequestBehavior.AllowGet );
+  return this.Json(messageInfo, JsonRequestBehavior.AllowGet );
 }
 ```
 -------------------------------------------------------
