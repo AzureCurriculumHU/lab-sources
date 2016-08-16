@@ -7,12 +7,12 @@ A Visual Studio 2015 Community és Professional és Enterprise változatai is me
 A Community verzió teljesen szabadon elérhető, a Professional, vagy Enterprise változatok általában egyetemi BizSpark licensz keretében.
 A teljes fejlesztői élmény érdekében érdemes a legújabb frissítéseket feltenni hozzá (pillanatnyilag ez az Update 3)
 
-[letöltés](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx)
+[Letöltés](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx)
 
 ## Azure SDK ##
 Microsoft Azure SDK for .NET (VS2015) v2.9.1.
 
-[gyűjtőoldal](https://azure.microsoft.com/hu-hu/downloads/) | [közvetlen letöltés](https://go.microsoft.com/fwlink/?LinkId=518003&clcid=0x409)
+[Gyűjtőoldal](https://azure.microsoft.com/hu-hu/downloads/) | [közvetlen letöltés](https://go.microsoft.com/fwlink/?LinkId=518003&clcid=0x409)
 
 ## Azure CLI ##
 Microsoft Azure Cross-platform Command Line Tools v0.10.2
@@ -28,7 +28,7 @@ Microsoft Azure PowerShell v2.0.1
 
 Visual Studio Code v1.3
 
-[letöltés (Windows, Linux, OS X)](https://code.visualstudio.com/Download)
+[Letöltés (Windows, Linux, OS X)](https://code.visualstudio.com/Download)
 
 ## Azure előfizetés ##
 
@@ -42,7 +42,7 @@ Visual Studio Code v1.3
 
 ## Visual Studio Team Services ##
 
-[ingyenes előfizetés](https://www.visualstudio.com/en-us/products/visual-studio-team-services-vs.aspx)
+[Ingyenes előfizetés](https://www.visualstudio.com/en-us/products/visual-studio-team-services-vs.aspx)
 
 
 
