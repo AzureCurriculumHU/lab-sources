@@ -12,21 +12,17 @@ A teljes fejlesztői élmény érdekében érdemes a legújabb frissítéseket f
 ## Azure SDK ##
 Microsoft Azure SDK for .NET (VS2015) v2.9.1.
 
-[letöltés](https://go.microsoft.com/fwlink/?LinkId=518003&clcid=0x409)
+[gyűjtőoldal](https://azure.microsoft.com/hu-hu/downloads/) | [közvetlen letöltés](https://go.microsoft.com/fwlink/?LinkId=518003&clcid=0x409)
 
 ## Azure CLI ##
 Microsoft Azure Cross-platform Command Line Tools v0.10.2
 
-[letöltés](https://www.microsoft.com/web/handlers/webpi.ashx?command=getinstallerredirect&appid=windowsazurexplatcli&mode=new)
-
-[OS X és Linux telepítés](https://azure.microsoft.com/hu-hu/documentation/articles/xplat-cli-install/)
+[Ismertető](https://azure.microsoft.com/hu-hu/documentation/articles/xplat-cli-install/) | [Windows](https://www.microsoft.com/web/handlers/webpi.ashx?command=getinstallerredirect&appid=windowsazurexplatcli&mode=new) | [OS X és Linux telepítés](https://azure.microsoft.com/hu-hu/documentation/articles/xplat-cli-install/)
 
 ## Azure PowerShell ##
 Microsoft Azure PowerShell v2.0.1
 
-[GitHub oldal](https://github.com/Azure/azure-powershell)
-
-[telepítési útmutató](https://azure.microsoft.com/en-us/documentation/articles/powershell-install-configure/)
+[GitHub oldal](https://github.com/Azure/azure-powershell) | [telepítési útmutató](https://azure.microsoft.com/en-us/documentation/articles/powershell-install-configure/)
 
 ## Visual Studio Code ##
 
