@@ -36,7 +36,7 @@ Visual Studio Code v1.3
 
 [30 napos ingyenes próbaverzió (bankkártya szükséges)](https://azure.microsoft.com/hu-hu/free/)
 
-~~[Egyetemi kurzusokhoz]~~(https://www.microsoftazurepass.com/azureu)(jelenleg inaktív)
+~~[Egyetemi kurzusokhoz]~~(https://www.microsoftazurepass.com/azureu) (jelenleg inaktív)
 
 [Hallgatóknak, DreamSpark program keretévben](https://imagine.microsoft.com/en-us/catalog?productid=99)
 
